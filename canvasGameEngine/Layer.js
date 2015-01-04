@@ -73,7 +73,7 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gu
         },
         
         parseData: function(data) {
-            var encoding, compression = null, i;
+            var encoding = null, compression = null, i;
             DOM.attributes(data, function(attr) {
                 switch(attr.name) {
                     case "encoding":
@@ -88,17 +88,6 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gu
             }, this);
             
             this.data = new Array(this.width);
-            //for(i = 0; i < this.width; i++) {
-            //    this.data[i] = new Array(this.height);
-            //}
-            /*
-            if(encoding != "csv") {
-                window.console.error("Unsupported encoding", encoding);
-                this.loaded = true;
-                this.emit("loaded");
-                return;
-            }
-            */
             
             var els, dataLoaded = false;
             
@@ -149,6 +138,16 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gu
                 }
                 
                 dataLoaded = true;
+            } else if(!encoding) {
+                window.console.error("Explicitly not support XML encoding format. Why would you use that when literally any other option is better?");
+                this.loaded = true;
+                this.emit("loaded");
+                return;
+            } else {
+                window.console.error("Unsupported encoding", encoding);
+                this.loaded = true;
+                this.emit("loaded");
+                return;
             }
                 
             
