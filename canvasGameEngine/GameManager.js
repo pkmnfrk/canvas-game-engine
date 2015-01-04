@@ -131,6 +131,15 @@ define(['canvasGameEngine/Map', 'canvasGameEngine/SpriteSheet', 'canvasGameEngin
             if(obj.name) {
                 delete this.globalObjectNames[obj.name];
             }
+        },
+        
+        loadMap: function(url) {
+            var map = new Map({
+                url: url,
+                gameManager: this
+            });
+            
+            return map;
         }
         
     };

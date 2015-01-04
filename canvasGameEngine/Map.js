@@ -1,6 +1,12 @@
-define(['jquery', 'canvasGameEngine/Layer', 'canvasGameEngine/Tileset', 'canvasGameEngine/SolidDebugLayer',
-        'canvasGameEngine/BlankLayer', 'emitter', 'canvasGameEngine/DomHelpers'],
-function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
+define(['jquery',
+        'canvasGameEngine/Layer',
+        'canvasGameEngine/Tileset',
+        'canvasGameEngine/SolidDebugLayer',
+        'canvasGameEngine/BlankLayer',
+        'emitter',
+        'canvasGameEngine/DomHelpers',
+        'canvasGameEngine/GameObject'],
+function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObject) {
     "use strict";
     
     var Map = function(options) {
@@ -15,17 +21,11 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
         this.tilesetCache = {};
         this.objects = [];
         this.objectNames = {};
-        this.objectLoader = options.objectLoader;
         
         if(this.url.lastIndexOf('/') != -1) {
             this.rootUrl = this.url.substr(0, this.url.lastIndexOf('/'));
         }
         
-        
-        /*$.get(this.url).done((function(data, a, b) {
-            this.data = data;
-            this.parseData();
-        }).bind(this), "xml");*/
         
         $.ajax({
             type: "GET",
@@ -33,7 +33,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
             dataType: "xml",
             success: (function(xmlData) {
                 this.data = xmlData;
-                this.parseData();
+                this.parseData(options.gameManager);
             }).bind(this),
             error: function() {
                 
@@ -79,7 +79,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
         width: 0,
         height: 0,
         objects: null,
-        objectLoader: null,
         gameManager: null,
         
         
@@ -95,12 +94,12 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
         
         frozen: false,
         
-        parseData: function() {
+        parseData: function(gameManager) {
             var i;
             var toLoad = 0;
             
             
-            this.parseMapNode(this.data.documentElement);
+            this.parseMapNode(gameManager, this.data.documentElement);
             
             
             if(this.backgroundColor && this.attached) {
@@ -162,7 +161,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
             this.emit('loaded');
         },
         
-        parseMapNode: function(map) {
+        parseMapNode: function(gameManager, map) {
             DOM.attributes(map, function(attr) {
                 switch(attr.name) {
                     case "width":
@@ -214,7 +213,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
                         }
                         break;
                     case "objectgroup":
-                        this.parseObjectgroup(node);
+                        this.parseObjectgroup(gameManager, node);
                         break;
                     default:
                         window.console.warn("Unexpected map node", node);
@@ -222,10 +221,46 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
             }, this);
         },
         
-        parseObjectgroup: function(objectgroup) {
+        makeObject: function(obj) {
+            var o = {};
+            DOM.attributes(obj, function(attr) {
+                o[attr.name] = attr.value;
+            }, this);
+            
+            DOM.children(obj, function(node) {
+                if(node.nodeName == "properties") {
+                    DOM.children(node, function(property) {
+                        var name, val;
+                        if(property.nodeName != "property") return;
+                        
+                        DOM.attributes(property, function(attr) {
+                            if(attr.name == "name") {
+                                name = attr.value;
+                            } else if(attr.name == "value") {
+                                val = attr.value;
+                            }
+                        }, this);
+                        
+                        if(name) {
+                            o[name] = val;
+                        }
+                    }, this);
+                }
+            }, this);
+            
+            return o;
+        },
+        
+        parseObjectgroup: function(gameManager, objectgroup) {
             DOM.children(objectgroup, function(node) {
                 if(node.nodeName == "object") {
-                    var obj = this.objectLoader.createObject(node);
+                    var obj;
+                    var o = this.makeObject(node);
+                    if(gameManager.objectLoader) {
+                        obj = gameManager.objectLoader.createObject(o);
+                    } else {
+                        obj = new GameObject(o);
+                    }
                     
                     if(obj) {
                         this.addObject(obj);

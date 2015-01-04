@@ -1,20 +1,14 @@
 
 
 define(['canvasGameEngine/GameManager',
-        'canvasGameEngine/Map',
-        'canvasGameEngine/Layer',
         'canvasGameEngine/GameObject',
-        'canvasGameEngine/SpriteSheet',
-        'canvasGameEngine/DomHelpers'
+        'canvasGameEngine/SpriteSheet'
        ],
-       function(GameManager, Map, Layer, GameObject, SpriteSheet, DomHelpers) {
+       function(GameManager, GameObject, SpriteSheet) {
     "use strict";
     return {
         GameManager: GameManager,
-        Map: Map,
-        Layer: Layer,
         SpriteSheet: SpriteSheet,
-        GameObject: GameObject,
-        DOM: DomHelpers
+        GameObject: GameObject
     };
 });
