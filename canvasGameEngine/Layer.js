@@ -1,4 +1,4 @@
-define(['emitter', 'canvasGameEngine/DomHelpers'], function(emitter, DOM) {
+define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary'], function(emitter, DOM, Binary) {
     "use strict";
     var Layer = function(options) {
         options = options || {};
@@ -88,37 +88,53 @@ define(['emitter', 'canvasGameEngine/DomHelpers'], function(emitter, DOM) {
             //for(i = 0; i < this.width; i++) {
             //    this.data[i] = new Array(this.height);
             //}
-            
+            /*
             if(encoding != "csv") {
                 window.console.error("Unsupported encoding", encoding);
                 this.loaded = true;
                 this.emit("loaded");
                 return;
             }
+            */
             
+            var els, dataLoaded = false;
             
-            var els = data.innerHTML.replace(/\s/g, "");
-            
-            els = els.split(",");
-            if(els.length != this.width * this.height) {
-                window.console.error("Incorrect number of data elements. Expected", this.width * this.height, "got", els.length);
-                this.loaded = true;
-                this.emit("loaded");
-                return;
+            if(encoding == "csv") {
+                els = data.innerHTML.replace(/\s/g, "");
+
+                els = els.split(",");
+                if(els.length != this.width * this.height) {
+                    window.console.error("Incorrect number of data elements. Expected", this.width * this.height, "got", els.length);
+                    this.loaded = true;
+                    this.emit("loaded");
+                    return;
+                }
+                
+                this.rawBuffer = new ArrayBuffer(els.length * 4);
+                
+            } else if(encoding == "base64") {
+                els = data.innerHTML.replace(/\s/g,"");
+                
+                this.rawBuffer = Binary.base64DecToBuffer(els, 4);
+                dataLoaded = true;
             }
+                
             
             var tileCache = {};
             
-            this.rawBuffer = new ArrayBuffer(els.length * 2);
+            for(i = 0; i < this.height; i++) {
+                this.data[i] = new Uint32Array(this.rawBuffer, this.width * 4 * i, this.width);
+            }
+            
             
             for(i = 0; i < els.length; i++) {
-                var x = i % this.width;
-                var y = Math.floor(i / this.width);
-                if(y === 0) {
-                    this.data[x] = new Uint16Array(this.rawBuffer, this.height * 2 * x, this.height);
+                if(!dataLoaded) {
+                    var x = i % this.width;
+                    var y = Math.floor(i / this.width);
+
+                    this.data[y][x] = parseInt(els[i], 10);
                 }
                 
-                this.data[x][y] = parseInt(els[i], 10);
                 tileCache[els[i]] = true;
             }
             
@@ -196,10 +212,10 @@ define(['emitter', 'canvasGameEngine/DomHelpers'], function(emitter, DOM) {
                     var dx = x * this.map.tileWidth;
                     
                     if(x == 169 && y == 92) {
-                        window.console.log(this.data[x][y]);
+                        window.console.log(this.data[y][x]);
                     }
                     
-                    this.map.drawTile(this.context, this.data[x][y], dx, dy);
+                    this.map.drawTile(this.context, this.data[y][x], dx, dy);
                     
                     ptr++;
                 }

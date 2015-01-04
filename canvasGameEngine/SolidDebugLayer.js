@@ -43,7 +43,7 @@ define([], function() {
                 for(var y = 0; y < this.data[x].length; y++) {
                     var dy = y * this.map.tileHeight;
                     
-                    if(this.data[x][y]) ctx.fillRect(dx, dy, this.map.tileWidth, this.map.tileHeight);
+                    if(this.data[y][x]) ctx.fillRect(dx, dy, this.map.tileWidth, this.map.tileHeight);
                 }
             }
                 

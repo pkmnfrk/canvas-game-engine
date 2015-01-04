@@ -107,9 +107,9 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
                 this.attached.style.backgroundColor = this.backgroundColor;
             }
             
-            this.solid = new Array(this.width);
-            for(i = 0; i < this.width; i++) {
-                this.solid[i] = new Array(this.height);
+            this.solid = new Array(this.height);
+            for(i = 0; i < this.height; i++) {
+                this.solid[i] = new Array(this.width);
             }
             
             var onTilesetLoad = (function() {
@@ -235,14 +235,14 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
         },
         
         recalculateSolids: function () {
-            for(var x = 0; x < this.width; x++) {
+            for(var y = 0; y < this.height; y++) {
+                for(var x = 0; x < this.width; x++) {
                 //this.solid[x] = [];
                 
-                for(var y = 0; y < this.height; y++) {
                     var solid = false;
                     
                     for(var l = 0; l < this.layers.length; l++) {
-                        var tile = this.layers[l].data[x][y];
+                        var tile = this.layers[l].data[y][x];
                         
                         var tst = this.tilesetForTile(tile);
                         if(!tst) continue;
@@ -263,7 +263,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
                         
                     }
                     
-                    this.solid[x][y] = solid;
+                    this.solid[y][x] = solid;
                 }
             }
         },
@@ -366,7 +366,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM) {
             
             for(var x = rxa; x <= rxb; x++) {
                 for(var y = rya; y <= ryb; y++) {
-                    if(this.solid[x][y]) return true;
+                    if(this.solid[y][x]) return true;
                 }
             }
             

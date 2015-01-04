@@ -1,7 +1,7 @@
 {
     "browser": true,
     "undef": true,
-    "unused": true,
+    "unused": "vars",
     "predef": ["define", "requirejs"],
     "strict": true
 }

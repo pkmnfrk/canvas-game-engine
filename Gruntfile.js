@@ -1,3 +1,4 @@
+/*jshint ignore:start*/
 //Wrapper function with one parameter
 module.exports = function(grunt) {
     var bannerContent = '/*! <%= pkg.name %> v<%= pkg.version %> - ' +
@@ -22,63 +23,95 @@ module.exports = function(grunt) {
                       'js/**/*.js'];
     
     grunt.initConfig({
-      // pkg is used from templates and therefore
-      // MUST be defined inside initConfig object
-      pkg : grunt.file.readJSON('package.json'),
-      copy: {
-        development: { // copy non-minified release file
-          src: devRelease,
-          dest: lDevRelease
+        // pkg is used from templates and therefore
+        // MUST be defined inside initConfig object
+        pkg : grunt.file.readJSON('package.json'),
+        copy: {
+            development: { // copy non-minified release file
+                src: devRelease,
+                dest: lDevRelease
+            },
+            minified: { // copy minified release file
+                src: minRelease,
+                dest: lMinRelease
+            },
+            smMinified: { // source map of minified release file
+                src: sourceMapMin,
+                dest: lSourceMapMin
+            }
         },
-        minified: { // copy minified release file
-          src: minRelease,
-          dest: lMinRelease
+        uglify: {
+            options: {
+                banner: bannerContent,
+                sourceMapRoot: '../',
+                sourceMap: 'distrib/'+name+'.min.js.map',
+                sourceMapUrl: name+'.min.js.map'
+            },
+            target : {
+                src : inputFiles,
+                dest : 'distrib/' + name + '.min.js'
+            }
         },
-        smMinified: { // source map of minified release file
-          src: sourceMapMin,
-          dest: lSourceMapMin
+        // concat configuration
+        concat: {
+            options: {
+                banner: bannerContent
+            },
+            target : {
+                src : inputFiles,
+                dest : 'distrib/' + name + '.js'
+            }
+        },
+        jshint: {
+            options: {
+                jshintrc: true
+            },
+            target: {
+                src : ['canvasGameEngine.js', 'canvasGameEngine/**/*.js']
+            }
+        },
+        requirejs: {
+            compile: {
+                options: {
+                    baseUrl: "lib",
+                    paths: {
+                        "canvasGameEngine": "../canvasGameEngine"
+                    },
+                    include: ["../tools/almond", "canvasGameEngine"],
+                    exclude: ["jquery"],
+                    out: "dist/canvasGameEngine.min.js",
+                    wrap: {
+                        "startFile": "tools/wrap.start",
+                        "endFile": "tools/wrap.end"
+                    }
+                }
+            },
+            compileUnopt: {
+                options: {
+                    baseUrl: "lib",
+                    paths: {
+                        "canvasGameEngine": "../canvasGameEngine"
+                    },
+                    include: ["../tools/almond", "canvasGameEngine"],
+                    exclude: ["jquery"],
+                    out: "dist/canvasGameEngine.js",
+                    wrap: {
+                        "startFile": "tools/wrap.start",
+                        "endFile": "tools/wrap.end"
+                    },
+                    optimize: "none"
+                }
+            }
+            
         }
-      },
-      uglify: {
-        options: {
-          banner: bannerContent,
-          sourceMapRoot: '../',
-          sourceMap: 'distrib/'+name+'.min.js.map',
-          sourceMapUrl: name+'.min.js.map'
-        },
-        target : {
-          src : inputFiles,
-          dest : 'distrib/' + name + '.min.js'
-        }
-      },
-      // concat configuration
-      concat: {
-        options: {
-          banner: bannerContent
-        },
-        target : {
-          src : inputFiles,
-          dest : 'distrib/' + name + '.js'
-        }
-      },
-      jshint: {
-        options: {
-          "browser": true,
-          "undef": true,
-          "unused": true,
-          "predef": ["define", "requirejs"],
-          "strict": true
-        },
-        target: {
-          src : ['js/**/*.js']
-        }
-      }
     });
     
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'copy']);
+  grunt.loadNpmTasks('grunt-contrib-requirejs');
+    
+  grunt.registerTask('default', ['jshint', 'requirejs']);
 
 };
