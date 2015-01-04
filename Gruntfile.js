@@ -22,6 +22,21 @@ module.exports = function(grunt) {
                       'emitter.js',
                       'js/**/*.js'];
     
+    var rjsshims = {
+        gunzip:  {
+            exports: 'Zlib.Gunzip'
+        },
+        inflate: {
+            exports: 'Zlib.Inflate'
+        }
+    };
+    
+    var rjspaths = {
+        "canvasGameEngine": "../canvasGameEngine",
+        gunzip: "../node_modules/zlibjs/bin/gunzip.min",
+        inflate: "../node_modules/zlibjs/bin/inflate.min"
+    };
+    
     grunt.initConfig({
         // pkg is used from templates and therefore
         // MUST be defined inside initConfig object
@@ -74,24 +89,24 @@ module.exports = function(grunt) {
             compile: {
                 options: {
                     baseUrl: "lib",
-                    paths: {
-                        "canvasGameEngine": "../canvasGameEngine"
-                    },
+                    paths: rjspaths,
                     include: ["../tools/almond", "canvasGameEngine"],
                     exclude: ["jquery"],
                     out: "dist/canvasGameEngine.min.js",
                     wrap: {
                         "startFile": "tools/wrap.start",
                         "endFile": "tools/wrap.end"
-                    }
+                    },
+                    optimize: "uglify2",
+                    shim: rjsshims,
+                    generateSourceMaps: true,
+                    preserveLicenseComments: false
                 }
             },
             compileUnopt: {
                 options: {
                     baseUrl: "lib",
-                    paths: {
-                        "canvasGameEngine": "../canvasGameEngine"
-                    },
+                    paths: rjspaths,
                     include: ["../tools/almond", "canvasGameEngine"],
                     exclude: ["jquery"],
                     out: "dist/canvasGameEngine.js",
@@ -99,7 +114,10 @@ module.exports = function(grunt) {
                         "startFile": "tools/wrap.start",
                         "endFile": "tools/wrap.end"
                     },
-                    optimize: "none"
+                    optimize: "none",
+                    shim: rjsshims,
+                    generateSourceMaps: true,
+                    preserveLicenseComments: false
                 }
             }
             

@@ -1,4 +1,4 @@
-define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary'], function(emitter, DOM, Binary) {
+define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gunzip', 'inflate'], function(emitter, DOM, Binary, Gunzip, Inflate) {
     "use strict";
     var Layer = function(options) {
         options = options || {};
@@ -73,11 +73,14 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary'], fu
         },
         
         parseData: function(data) {
-            var encoding, i;
+            var encoding, compression = null, i;
             DOM.attributes(data, function(attr) {
                 switch(attr.name) {
                     case "encoding":
                         encoding = attr.value;
+                        break;
+                    case "compression":
+                        compression = attr.value;
                         break;
                     default:
                         window.console.warn("Unexpected layer data attribute", attr);
@@ -115,7 +118,36 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary'], fu
             } else if(encoding == "base64") {
                 els = data.innerHTML.replace(/\s/g,"");
                 
-                this.rawBuffer = Binary.base64DecToBuffer(els, 4);
+                this.rawBuffer = Binary.base64DecToBuffer(els);
+                
+                var inputArray, inflated;
+                if(compression == "gzip") {
+                    inputArray = new Uint8Array(this.rawBuffer);
+                    
+                    var gunzip = new Gunzip(inputArray);
+                    inflated = gunzip.decompress();
+                    
+                    this.rawBuffer = inflated.buffer;
+                } else if(compression == "zlib") {
+                    inputArray = new Uint8Array(this.rawBuffer);
+                    
+                    var inflate = new Inflate(inputArray, {
+                        bufferSize: this.width * this.height * 4,
+                        bufferType: Inflate.BufferType.BLOCK
+                    });
+                    inflated = inflate.decompress();
+                    
+                    this.rawBuffer = inflated.buffer;
+                    
+                } else if(!compression) {
+                    
+                } else {
+                    window.console.error("Unsupported compression", compression);
+                    this.loaded = true;
+                    this.emit("loaded");
+                    return;
+                }
+                
                 dataLoaded = true;
             }
                 
