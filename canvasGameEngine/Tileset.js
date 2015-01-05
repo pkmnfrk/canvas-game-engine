@@ -36,6 +36,7 @@ define(['canvasGameEngine/Path', 'jquery', 'emitter'], function(Path, $, emitter
         imageWidth: 0,
         imageHeight: 0,
         loaded: false,
+        tilesPerRow: 0,
         
         parseTilesetNode: function(tileset) {
             var i;
@@ -85,6 +86,8 @@ define(['canvasGameEngine/Path', 'jquery', 'emitter'], function(Path, $, emitter
                         window.console.warn("Unexpected tileset node", node);
                 }
             }
+            
+            this.tilesPerRow = Math.floor(this.imageWidth / this.tileWidth);
         },
         
         parseProperties: function(properties) {
@@ -238,8 +241,8 @@ define(['canvasGameEngine/Path', 'jquery', 'emitter'], function(Path, $, emitter
         drawTile: function(ctx, i, dx, dy) {
             i = i - this.firstgid;
             
-            var sx = (i * this.tileWidth) % this.imageWidth;
-            var sy = Math.floor((i * this.tileWidth) / this.imageWidth) * this.tileHeight;
+            var sx = (i % this.tilesPerRow) * this.tileWidth;
+            var sy = Math.floor(i / this.tilesPerRow) * this.tileHeight;
             
             ctx.drawImage(this.image, sx, sy, this.tileWidth, this.tileHeight,
                                       dx, dy, this.tileWidth, this.tileHeight);

@@ -157,16 +157,16 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gu
                 this.data[i] = new Uint32Array(this.rawBuffer, this.width * 4 * i, this.width);
             }
             
-            
-            for(i = 0; i < els.length; i++) {
+            var tiles = this.width * this.height;
+            for(i = 0; i < tiles; i++) {
+                var x = i % this.width;
+                var y = Math.floor(i / this.width);
+                
                 if(!dataLoaded) {
-                    var x = i % this.width;
-                    var y = Math.floor(i / this.width);
-
                     this.data[y][x] = parseInt(els[i], 10);
                 }
                 
-                tileCache[els[i]] = true;
+                tileCache[this.data[y][x]] = true;
             }
             
             var tilesets = [];
