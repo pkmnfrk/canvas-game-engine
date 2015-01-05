@@ -256,8 +256,8 @@ define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gu
         
         update: function() {
             if(this.canvas) {
-                this.canvas.style.left = (this.x - this.map.left) + "px";
-                this.canvas.style.top = (this.y - this.map.top) + "px";
+                this.canvas.style.left = Math.floor(this.x - this.map.left) + "px";
+                this.canvas.style.top = Math.floor(this.y - this.map.top) + "px";
             }
         }
     };

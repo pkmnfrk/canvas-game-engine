@@ -97,6 +97,8 @@ define(['jquery','canvasGameEngine/Path'], function($, Path) {
             x -= ox;
             y -= oy;
             
+            x = Math.floor(x);
+            y = Math.floor(y);
             
             ctx.drawImage(this.image, sx, sy, frame.w, frame.h, x, y, frame.w, frame.h);
         },
@@ -151,24 +153,29 @@ define(['jquery','canvasGameEngine/Path'], function($, Path) {
 
                 var t = frames[this.curFrame].length;
 
-                if(this.curFrameTime >= t) {
-                    this.curFrameTime -= t;
-                    
-                    if(this.spriteSheet.animations[this.curAnimation].repeat) {
-                        this.curFrame++;
+                if(t > 0) {
+                    if(this.curFrameTime >= t) {
+                        this.curFrameTime -= t;
 
-                        if(this.curFrame >= frames.length) {
-                            this.curFrame = 0;
-                        }
-                    } else {
-                        if(this.curFrame < frames.length - 1) {
-                            this.curFrame ++;
+                        if(this.spriteSheet.animations[this.curAnimation].repeat) {
+                            this.curFrame++;
+
+                            if(this.curFrame >= frames.length) {
+                                this.curFrame = 0;
+                            }
                         } else {
-                            this.running = false;
+                            if(this.curFrame < frames.length - 1) {
+                                this.curFrame ++;
+                            } else {
+                                this.running = false;
+                            }
                         }
+
+                    } else {
+                        break;
                     }
-                    
                 } else {
+                    this.running = false;
                     break;
                 }
             }
@@ -195,17 +202,33 @@ define(['jquery','canvasGameEngine/Path'], function($, Path) {
         
         setAnimation: function(anim) {
             if(this.curAnimation == anim) return;
-            if(!this.curAnimation ||
-               !this.spriteSheet.animations[this.curAnimation] ||
-               !this.spriteSheet.animations[this.curAnimation].keepFrame ||
-                this.spriteSheet.animations[this.curAnimation].keepFrame.indexOf(anim) === -1) {
-                
-                this.curFrame = 0;
-                this.curFrameTime = 0;
-                this.running = true;
-                
+            if(this.loaded) {
+                if(!this.curAnimation ||
+                   !this.spriteSheet.animations[this.curAnimation] ||
+                   !this.spriteSheet.animations[this.curAnimation].keepFrame) {
+
+                    var keeps = this.spriteSheet.animations[this.curAnimation].keepFrame;
+                    var keep = false;
+
+                    for(var i = 0; i < keeps.length; i++) {
+                        if(typeof keeps[i] != "object") {
+                            keeps[i] = new RegExp(keeps[i], "i");
+                        }
+
+                        if(keeps[i].test(anim)) {
+                            keep = true;
+                            break;
+                        }
+                    }
+                    //this.spriteSheet.animations[this.curAnimation].keepFrame.indexOf(anim) === -1
+
+                    if(!keep) {
+                        this.curFrame = 0;
+                        this.curFrameTime = 0;
+                    }
+                }
             }
-            
+            this.running = true;
             this.curAnimation = anim;
             
         }

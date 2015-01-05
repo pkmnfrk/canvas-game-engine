@@ -99,7 +99,7 @@ module.exports = function(grunt) {
                     },
                     optimize: "uglify2",
                     shim: rjsshims,
-                    generateSourceMaps: true,
+                    //generateSourceMaps: true,
                     preserveLicenseComments: false
                 }
             },
@@ -116,7 +116,7 @@ module.exports = function(grunt) {
                     },
                     optimize: "none",
                     shim: rjsshims,
-                    generateSourceMaps: true,
+                    //generateSourceMaps: true,
                     preserveLicenseComments: false
                 }
             }

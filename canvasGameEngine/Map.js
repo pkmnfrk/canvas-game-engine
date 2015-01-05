@@ -62,7 +62,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                     this._top = val;
                     this.updateLayers();
                 }
-            }
+            },
         });
     };
     
@@ -78,6 +78,8 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         tileHeight: 0,
         width: 0,
         height: 0,
+        pixelWidth: 0,
+        pixelHeight: 0,
         objects: null,
         gameManager: null,
         
@@ -110,6 +112,9 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             for(i = 0; i < this.height; i++) {
                 this.solid[i] = new Array(this.width);
             }
+            
+            this.pixelWidth = this.width * this.tileWidth;
+            this.pixelHeight = this.height * this.tileHeight;
             
             var onTilesetLoad = (function() {
                 toLoad--;
@@ -156,8 +161,8 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                 }
             }
             
-            
-            this.loaded= true;
+            this.updateLayers();
+            this.loaded = true;
             this.emit('loaded');
         },
         
