@@ -1,4 +1,4 @@
-define(['jquery','canvasGameEngine/Path'], function($, Path) {
+define(['jquery','canvas-game-engine/Path'], function($, Path) {
     "use strict";
     
     var SpriteSheet = function(options) {
@@ -151,6 +151,10 @@ define(['jquery','canvasGameEngine/Path'], function($, Path) {
             while(true) {
                 var frames = this.spriteSheet.animations[this.curAnimation].frames;
 
+                while(this.curFrame >= frames.length) {
+                    this.curFrame -= frames.length;
+                }
+                
                 var t = frames[this.curFrame].length;
 
                 if(t > 0) {
@@ -175,6 +179,7 @@ define(['jquery','canvasGameEngine/Path'], function($, Path) {
                         break;
                     }
                 } else {
+                    this.curFrameTime = 0;
                     this.running = false;
                     break;
                 }
@@ -202,22 +207,26 @@ define(['jquery','canvasGameEngine/Path'], function($, Path) {
         
         setAnimation: function(anim) {
             if(this.curAnimation == anim) return;
-            if(this.loaded) {
+            if(this.spriteSheet.loaded) {
                 if(!this.curAnimation ||
                    !this.spriteSheet.animations[this.curAnimation] ||
                    !this.spriteSheet.animations[this.curAnimation].keepFrame) {
 
-                    var keeps = this.spriteSheet.animations[this.curAnimation].keepFrame;
                     var keep = false;
+                    
+                    if(this.spriteSheet.animations[this.curAnimation] && this.spriteSheet.animations[this.curAnimation].keepFrame) {
+                        var keeps = this.spriteSheet.animations[this.curAnimation].keepFrame;
 
-                    for(var i = 0; i < keeps.length; i++) {
-                        if(typeof keeps[i] != "object") {
-                            keeps[i] = new RegExp(keeps[i], "i");
-                        }
 
-                        if(keeps[i].test(anim)) {
-                            keep = true;
-                            break;
+                        for(var i = 0; i < keeps.length; i++) {
+                            if(typeof keeps[i] != "object") {
+                                keeps[i] = new RegExp(keeps[i], "i");
+                            }
+
+                            if(keeps[i].test(anim)) {
+                                keep = true;
+                                break;
+                            }
                         }
                     }
                     //this.spriteSheet.animations[this.curAnimation].keepFrame.indexOf(anim) === -1

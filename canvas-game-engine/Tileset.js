@@ -1,4 +1,4 @@
-define(['canvasGameEngine/Path', 'jquery', 'emitter'], function(Path, $, emitter) {
+define(['canvas-game-engine/Path', 'jquery', 'emitter'], function(Path, $, emitter) {
     "use strict";
     
     var Tileset = function(options) {

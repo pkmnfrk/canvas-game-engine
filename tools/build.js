@@ -1,11 +1,11 @@
 {
     "baseUrl": "../lib",
     "paths": {
-        "canvasGameEngine": "../canvasGameEngine"
+        "canvas-game-engine": "../canvas-game-engine"
     },
-    "include": ["../tools/almond", "canvasGameEngine"],
+    "include": ["../tools/almond", "canvas-game-engine"],
     "exclude": ["jquery"],
-    "out": "../dist/canvasGameEngine.js",
+    "out": "../dist/canvas-game-engine.js",
     "wrap": {
         "startFile": "wrap.start",
         "endFile": "wrap.end"

@@ -1,12 +1,12 @@
-define(['canvasGameEngine/Map', 'canvasGameEngine/SpriteSheet', 'canvasGameEngine/InputManager'], function(Map, SpriteSheet, InputManager) {
+define(['jquery', 'canvas-game-engine/Map', 'canvas-game-engine/SpriteSheet', 'canvas-game-engine/InputManager'], function($, Map, SpriteSheet, InputManager) {
     "use strict";
     
     var GameManager = function(options) {
         options = options || {};
         
-        this.main = options.main;
+        this.main = $(options.main);
         
-        this.window = options.window;
+        this.window = options.window || window;
         
         this.objectLoader = options.objectLoader;
         

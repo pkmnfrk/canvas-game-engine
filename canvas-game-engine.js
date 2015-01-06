@@ -1,8 +1,8 @@
 
 
-define(['canvasGameEngine/GameManager',
-        'canvasGameEngine/GameObject',
-        'canvasGameEngine/SpriteSheet'
+define(['canvas-game-engine/GameManager',
+        'canvas-game-engine/GameObject',
+        'canvas-game-engine/SpriteSheet'
        ],
        function(GameManager, GameObject, SpriteSheet) {
     "use strict";

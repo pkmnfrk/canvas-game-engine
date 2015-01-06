@@ -32,7 +32,7 @@ module.exports = function(grunt) {
     };
     
     var rjspaths = {
-        "canvasGameEngine": "../canvasGameEngine",
+        "canvas-game-engine": "../canvas-game-engine",
         gunzip: "../node_modules/zlibjs/bin/gunzip.min",
         inflate: "../node_modules/zlibjs/bin/inflate.min"
     };
@@ -82,7 +82,7 @@ module.exports = function(grunt) {
                 jshintrc: true
             },
             target: {
-                src : ['canvasGameEngine.js', 'canvasGameEngine/**/*.js']
+                src : ['canvas-game-engine.js', 'canvas-game-engine/**/*.js']
             }
         },
         requirejs: {
@@ -90,9 +90,9 @@ module.exports = function(grunt) {
                 options: {
                     baseUrl: "lib",
                     paths: rjspaths,
-                    include: ["../tools/almond", "canvasGameEngine"],
+                    include: ["../tools/almond", "canvas-game-engine"],
                     exclude: ["jquery"],
-                    out: "dist/canvasGameEngine.min.js",
+                    out: "dist/canvas-game-engine.min.js",
                     wrap: {
                         "startFile": "tools/wrap.start",
                         "endFile": "tools/wrap.end"
@@ -107,9 +107,9 @@ module.exports = function(grunt) {
                 options: {
                     baseUrl: "lib",
                     paths: rjspaths,
-                    include: ["../tools/almond", "canvasGameEngine"],
+                    include: ["../tools/almond", "canvas-game-engine"],
                     exclude: ["jquery"],
-                    out: "dist/canvasGameEngine.js",
+                    out: "dist/canvas-game-engine.js",
                     wrap: {
                         "startFile": "tools/wrap.start",
                         "endFile": "tools/wrap.end"

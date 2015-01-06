@@ -1,4 +1,4 @@
-define(['emitter', 'canvasGameEngine/DomHelpers', 'canvasGameEngine/Binary', 'gunzip', 'inflate'], function(emitter, DOM, Binary, Gunzip, Inflate) {
+define(['emitter', 'canvas-game-engine/DomHelpers', 'canvas-game-engine/Binary', 'gunzip', 'inflate'], function(emitter, DOM, Binary, Gunzip, Inflate) {
     "use strict";
     var Layer = function(options) {
         options = options || {};

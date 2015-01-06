@@ -1,11 +1,11 @@
 define(['jquery',
-        'canvasGameEngine/Layer',
-        'canvasGameEngine/Tileset',
-        'canvasGameEngine/SolidDebugLayer',
-        'canvasGameEngine/BlankLayer',
+        'canvas-game-engine/Layer',
+        'canvas-game-engine/Tileset',
+        'canvas-game-engine/SolidDebugLayer',
+        'canvas-game-engine/BlankLayer',
         'emitter',
-        'canvasGameEngine/DomHelpers',
-        'canvasGameEngine/GameObject'],
+        'canvas-game-engine/DomHelpers',
+        'canvas-game-engine/GameObject'],
 function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObject) {
     "use strict";
     
