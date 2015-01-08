@@ -12,6 +12,7 @@ define([], function() {
         
         this.x = parseInt(options.x, 10);
         this.y = parseInt(options.y, 10);
+        this.z = parseInt(options.z, 10) || 50;
         if(options.width) this.width = parseInt(options.width, 10);
         if(options.height) this.height = parseInt(options.height, 10);
         
@@ -22,6 +23,8 @@ define([], function() {
             
             this.boundingBox = [this.x, this.y, this.width, this.height];
         }
+        
+        
         
     };
     

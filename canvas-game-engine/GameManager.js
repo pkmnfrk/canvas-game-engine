@@ -45,7 +45,6 @@ define(['jquery',
             
             if(map) {
                 this.map = map;
-                this.map.attach(this);
             }
         },
         
@@ -141,7 +140,7 @@ define(['jquery',
                     return 1;
                 }
                 
-                return bz - az;
+                return az - bz;
             });
             
             this.viewport.clear();

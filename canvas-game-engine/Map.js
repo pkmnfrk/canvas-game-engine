@@ -21,6 +21,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         this.tilesetCache = {};
         this.objects = [];
         this.objectNames = {};
+        this.gameManager = options.gameManager;
         
         if(this.url.lastIndexOf('/') != -1) {
             this.rootUrl = this.url.substr(0, this.url.lastIndexOf('/'));
@@ -72,7 +73,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         layers: null,
         tilesets: null,
         rootUrl: "",
-        attached: null,
         solid: null,
         tileWidth: 0,
         tileHeight: 0,
@@ -102,11 +102,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             
             
             this.parseMapNode(gameManager, this.data.documentElement);
-            
-            
-            if(this.backgroundColor && this.attached) {
-                this.attached.style.backgroundColor = this.backgroundColor;
-            }
             
             this.solid = new Array(this.height);
             for(i = 0; i < this.height; i++) {
@@ -155,10 +150,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                 });
 
                 this.layers.push(solidLayer);
-
-                if(this.attached) {
-                    solidLayer.attach(this.attached);
-                }
             }
             
             this.updateLayers();
@@ -209,7 +200,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                         var layer = new Layer({
                             map: this,
                             node: node,
-                            zIndex: this.layers.length * 5 + 1
+                            zindex: this.layers.length * 5 + 1
                         });
 
                         this.layers.push(layer);
@@ -306,38 +297,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                     this.solid[y][x] = solid;
                 }
             }
-        },
-        
-        detatch: function() {
-            /*for(var i = 0; i < this.layers.length; i++) {
-                this.layers[i].detatch();
-            }
-            delete this.attached;
-            
-            if(this.spriteLayer) {
-                this.spriteLayer.parentElement.removeChild(this.spriteLayer);
-                delete this.spriteLayer;
-                delete this.spriteContext;
-            }
-            */
-            this.gameManager = null;
-        },
-        
-        attach: function(manager) {
-            /*for(var i = 0; i < this.layers.length; i++) {
-                this.layers[i].attach(root);
-            }
-            this.attached = root;
-            
-            this.spriteLayer = document.createElement("canvas");
-            this.spriteLayer.width = 512;
-            this.spriteLayer.height = 512;
-            this.spriteLayer.style.zIndex = 200;
-            this.spriteLayer.style.position = "absolute";
-            this.spriteContext = this.spriteLayer.getContext("2d");
-            root.appendChild(this.spriteLayer);
-            */
-            this.gameManager = manager;
         },
         
         freeze: function() {
@@ -446,7 +405,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                     map: this
                 });
                 this.layers.push(this.debugLayer);
-                if(this.attached) this.debugLayer.attach(this.attached);
             }
             
             var ctx = this.debugLayer.canvas.getContext("2d");

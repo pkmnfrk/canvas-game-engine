@@ -54,10 +54,47 @@ define(['emitter',
                     case "data":
                         this.parseData(node);
                         break;
+                    case "properties":
+                        this.parseProperties(node);
+                        break;
                     default:
                         window.console.warn("Unexpected layer node", node);
                 }
             }, this);
+        },
+        
+        parseProperties: function(properties) {
+            DOM.children(properties, function(node) {
+                switch(node.nodeName) {
+                    case "#text": break;
+                    case "property":
+                        this.parseProperty(node);
+                        break;
+                    default:
+                        window.console.warn("Unexpected layer property node", node);
+                }
+            }, this);
+        },
+        
+        parseProperty: function(property) {
+            var key, value;
+            
+            DOM.attributes(property, function(attr) {
+                switch(attr.name) {
+                    case "name":
+                        key = attr.value;
+                        break;
+                    case "value":
+                        value = attr.value;
+                        break;
+                }
+            }, this);
+            
+            this[key] = value;
+            
+            if(/^[0-9]+$/.test(this[key])) {
+                this[key] = parseInt(this[key],10);
+            }
         },
         
         parseData: function(data) {
