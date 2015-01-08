@@ -70,12 +70,8 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
             }
         },
         
-        drawFrame: function(map, frame, x, y, flipX /*, flipY*/) {
-            if(!map || !this.frames || !this.image) return;
-            
-            var ctx = map.spriteContext;
-            x -= map.left;
-            y -= map.top;
+        drawFrame: function(ctx, frame, x, y, flipX /*, flipY*/) {
+            if(!ctx || !this.frames || !this.image) return;
             
             if(typeof frame == "string") {
                 frame = this.frames[frame];
@@ -97,10 +93,11 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
             x -= ox;
             y -= oy;
             
-            x = Math.floor(x);
-            y = Math.floor(y);
+            //x = Math.floor(x);
+            //y = Math.floor(y);
             
-            ctx.drawImage(this.image, sx, sy, frame.w, frame.h, x, y, frame.w, frame.h);
+            ctx.drawImage(this.image, sx, sy, frame.w, frame.h,
+                                       x,  y, frame.w, frame.h);
         },
         
         getAnimator: function() {
@@ -186,14 +183,14 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
             }
         },
         
-        draw: function(map, x, y) {
+        draw: function(ctx, x, y) {
             if(!this.spriteSheet.loaded) return;
             
             var anim = this.spriteSheet.animations[this.curAnimation];
             
             if(!anim) return;
             
-            this.spriteSheet.drawFrame(map, anim.frames[this.curFrame].frame, x, y, anim.flipX, anim.flipY);
+            this.spriteSheet.drawFrame(ctx, anim.frames[this.curFrame].frame, x, y, anim.flipX, anim.flipY);
         },
         
         currentHeight: function() {

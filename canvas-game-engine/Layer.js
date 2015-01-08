@@ -1,40 +1,28 @@
-define(['emitter', 'canvas-game-engine/DomHelpers', 'canvas-game-engine/Binary', 'gunzip', 'inflate'], function(emitter, DOM, Binary, Gunzip, Inflate) {
+define(['emitter',
+        'canvas-game-engine/DomHelpers',
+        'canvas-game-engine/Binary',
+        'gunzip',
+        'inflate',
+        'canvas-game-engine/BlankLayer'],
+       function(emitter, DOM, Binary, Gunzip, Inflate, BlankLayer) {
     "use strict";
     var Layer = function(options) {
         options = options || {};
         
         emitter(this);
         
-        this.map = options.map;
-        this.canvas = document.createElement("canvas");
-        this.canvas.style.zIndex = options.zindex;
-        this.context = this.canvas.getContext("2d");
+        BlankLayer.call(this, options);
         
-        if(options.data) {
-            this.data = options.data;
-            this.canvas.width = this.map.tileWidth * this.width;
-            this.canvas.height = this.map.tileHeight * this.height;
-            this.canvas.style.opacity = this.opacity;
-
-            this.drawMap();
-            this.update();
-        } else if(options.node) {
-            this.parseLayer(options.node);
-        }
+        this.parseLayer(options.node);
+        
     };
     
-    Layer.prototype = {
-        map: null,
-        data: null,
-        canvas: null,
-        attached: null,
+    Layer.prototype = new BlankLayer();
+        
+    var newPrototype = {
         loaded: false,
-        opacity: 1,
         width: 1,
         height: 1,
-        tileWidth: 0,
-        tileHeight: 0,
-        context: null,
         rawBuffer: null,
         x: 0,
         y: 0,
@@ -207,30 +195,12 @@ define(['emitter', 'canvas-game-engine/DomHelpers', 'canvas-game-engine/Binary',
         tilesetsLoaded: function() {
             this.canvas.width = this.map.tileWidth * this.width;
             this.canvas.height = this.map.tileHeight * this.height;
-            this.canvas.style.opacity = this.opacity;
+            //this.canvas.style.opacity = this.opacity;
             
             this.drawMap();
             
             this.loaded = true;
             this.emit('loaded');
-        },
-        
-        attach: function(root) {
-            if(this.attached) {
-                this.detatch();
-            }
-            
-            this.attached = root;
-            if(this.canvas) {
-                root.appendChild(this.canvas);
-            }
-        },
-        
-        detatch: function() {
-            if(this.attached) {
-                if(this.canvas) this.attached.removeChild(this.canvas);
-                this.attached = null;
-            }
         },
         
         drawMap: function() {
@@ -254,13 +224,11 @@ define(['emitter', 'canvas-game-engine/DomHelpers', 'canvas-game-engine/Binary',
                 
         },
         
-        update: function() {
-            if(this.canvas) {
-                this.canvas.style.left = Math.floor(this.x - this.map.left) + "px";
-                this.canvas.style.top = Math.floor(this.y - this.map.top) + "px";
-            }
-        }
     };
+    
+    for(var p in newPrototype) {
+        Layer.prototype[p] = newPrototype[p];
+    }
     
     return Layer;
 });

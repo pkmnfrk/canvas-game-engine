@@ -1,35 +1,21 @@
-define([], function() {
+define(['canvas-game-engine/BlankLayer'], function(BlankLayer) {
     "use strict";
     var SolidDebugLayer = function(options) {
         options = options || {};
         
-        this.data = options.data;
-        this.map = options.map;
+        BlankLayer.call(this, options);
         
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = this.map.tileWidth * this.data.length;
-        this.canvas.height = this.map.tileHeight * this.data[0].length;
-        this.canvas.style.zIndex = 99;
-        this.canvas.style.opacity = 0.5;
+        this.data = options.data;
+        this.opacity = 0.5;
         
         this.drawMap();
-        this.update();
+        
     };
     
-    SolidDebugLayer.prototype = {
-        map: null,
+    SolidDebugLayer.prototype = new BlankLayer();
+    
+    var newPrototype = {
         data: null,
-        canvas: null,
-        
-        attach: function(root) {
-            root.appendChild(this.canvas);
-        },
-        
-        detatch: function() {
-            if(this.canvas.parentNode) {
-                this.canvas.parentNode.removeChild(this.canvas);
-            }
-        },
         
         drawMap: function() {
             this.canvas.width = this.canvas.width;
@@ -47,13 +33,12 @@ define([], function() {
                 }
             }
                 
-        },
-        
-        update: function() {
-            this.canvas.style.left = (-this.map.left) + "px";
-            this.canvas.style.top = (-this.map.top) + "px";
         }
     };
+    
+    for(var p in newPrototype) {
+        SolidDebugLayer.prototype[p] = newPrototype[p];
+    }
     
     return SolidDebugLayer;
 });

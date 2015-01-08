@@ -29,10 +29,10 @@ define([], function() {
         x: 0,
         y: 0,
         boundingBox: null,
-        name: null,
+        name: null
         
-        update: function() {},
-        draw: function() {}
+        //update: function(delta, input, map) {},
+        //draw: function(ctx, viewport) {}
         
     };
     

@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Performance benchmark</title>
+        
+        <style>
+            #container {
+                width: 512px;
+                height: 512px;
+                overflow: hidden;
+                position: relative;
+                
+            }
+            canvas {
+                position: absolute;
+                
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <div id="frames">0</div>
+        <div id="controls">
+            <input type="radio" name="method" value="blit" id="method_blit" checked="checked"/> <label for="method_blit">Blit</label>
+            <input type="radio" name="method" value="crop" id="method_crop" /> <label for="method_crop">Crop</label>
+            <input type="number" value="5" id="layer_count"> Layers
+            <input type="checkbox" value="jiggle" id="jiggle"> <label for="jiggle">Jiggle</label>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script>
+            var frames = 0;
+            var method = ""; //blit or crop
+            var newMethod = "blit";
+            var i;
+            var counter = document.getElementById("frames");
+            var layerCount = document.getElementById("layer_count");
+            var update = false;
+            var jiggle = document.getElementById("jiggle");
+            
+            function adjustLayers() {
+                if(layerCount.value != canvases.length) {
+                    var v = parseInt(layerCount.value, 10);
+                    var canvas;
+                    
+                    while(v < canvases.length) {
+                        canvas = canvases.pop();
+                        if(method == "crop") {
+                            $(canvas).remove();
+                        }
+                    }
+                    
+                    while(v > canvases.length) {
+                        var i = canvases.length;
+                        canvas = document.createElement("canvas");
+                        canvas.width = 2048;
+                        canvas.height = 2048;
+
+                        var ctx = canvas.getContext("2d");
+                        ctx.globalAlpha = 0.1;
+                        ctx.fillRect(i, i, 2048 - i * 10, 2048 - i * 5);
+                        ctx = null;
+
+                        canvas.ox = -i;
+                        canvas.oy = -i;
+
+                        canvases.push(canvas);
+                        if(method == "crop") {
+                            $("#container").append(canvas);
+                        }
+                    }
+                    
+                }
+            }
+            
+            function onFrame() {
+                var i;
+                
+                requestAnimationFrame(onFrame);
+                
+                if(newMethod != method) {
+                    frames = 0;
+                    if(method == "blit") {
+                        $(destCanvas).remove();
+                    } else if(method == "crop") {
+                        for(i = 0; i < canvases.length; i++ ) {
+                            $(canvases[i]).remove();
+                        }
+                    }
+                    
+                    if(newMethod == "blit") {
+                        $("#container").append(destCanvas);
+                    } else {
+                        for(i = 0; i < canvases.length; i++ ) {
+                            $("#container").append(canvases[i]);
+                        }
+                    }
+                    method = newMethod;
+                }
+                
+                adjustLayers();
+                
+                for(i = 0; i < canvases.length; i++) {
+                    if(jiggle.checked) {
+                        canvases[i].ox += Math.random() * 4 - 2;
+                        canvases[i].oy += Math.random() * 2 - 1;
+                    }
+                    if(method == "crop") {
+                        canvases[i].style.left = Math.floor(-canvases[i].ox) + "px";
+                        canvases[i].style.top = Math.floor(-canvases[i].oy) + "px";
+                    }
+                }
+                
+                if(method == "blit") {
+                    destCanvas.width = destCanvas.width;
+                    var ctx = destCanvas.getContext("2d");
+                    
+                    for(i = 0; i < canvases.length; i++) {
+                        ctx.drawImage(canvases[i], canvases[i].ox, canvases[i].oy, 512, 512, 0, 0, 512, 512);
+                        
+                    }
+                }
+                
+                frames++;
+            }
+            
+            setInterval(function() {
+                counter.innerHTML = frames;
+                frames = 0;
+            }, 1000);
+            
+            $("#method_blit, #method_crop").click(function(e) {
+                newMethod = $(this).val();
+            });
+            
+            var canvases = [];
+            var destCanvas = document.createElement("canvas");
+            
+            destCanvas.width = 512;
+            destCanvas.height = 512;
+            
+            
+            adjustLayers();
+            
+            requestAnimationFrame(onFrame);
+        </script>
+    </body>
+</html>

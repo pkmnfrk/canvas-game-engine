@@ -1,10 +1,15 @@
-define(['jquery', 'canvas-game-engine/Map', 'canvas-game-engine/SpriteSheet', 'canvas-game-engine/InputManager'], function($, Map, SpriteSheet, InputManager) {
+define(['jquery',
+        'canvas-game-engine/Map',
+        'canvas-game-engine/SpriteSheet',
+        'canvas-game-engine/InputManager',
+        'canvas-game-engine/Layer'],
+       function($, Map, SpriteSheet, InputManager, Layer) {
     "use strict";
     
     var GameManager = function(options) {
         options = options || {};
         
-        this.main = $(options.main);
+        this.viewport = options.viewport;
         
         this.window = options.window || window;
         
@@ -27,6 +32,7 @@ define(['jquery', 'canvas-game-engine/Map', 'canvas-game-engine/SpriteSheet', 'c
         lastDelta: null,
         stopping: false,
         frozen: false,
+        viewport: null,
         
         globalObjects: null,
         globalObjectNames: null,
@@ -39,7 +45,7 @@ define(['jquery', 'canvas-game-engine/Map', 'canvas-game-engine/SpriteSheet', 'c
             
             if(map) {
                 this.map = map;
-                this.map.attach(this.main, this);
+                this.map.attach(this);
             }
         },
         
@@ -102,14 +108,52 @@ define(['jquery', 'canvas-game-engine/Map', 'canvas-game-engine/SpriteSheet', 'c
                 }
             }
             
-            this.map.clearSprites();
+            //this.map.clearSprites();
+            var toDraw = [];
+            
             for(i = 0; i < this.globalObjects.length; i++) {
                 obj = this.globalObjects[i];
                 if(obj.draw) {
-                    obj.draw(this.map);
+                    toDraw.push(obj);
                 }
             }
-            this.map.draw();
+            
+            for(i = 0; i < this.map.objects.length; i++) {
+                obj = this.map.objects[i];
+                if(obj.draw) {
+                    toDraw.push(obj);
+                }
+            }
+            
+            for(i = 0; i < this.map.layers.length; i++) {
+                obj = this.map.layers[i];
+                toDraw.push(obj);
+            }
+            
+            toDraw.sort(function(a, b) {
+                var az = a.z || 0;
+                var bz = b.z || 0;
+                
+                if(az == bz) {
+                    if(Object.getPrototypeOf(a) == Layer.prototype) {
+                        return -1;
+                    }
+                    return 1;
+                }
+                
+                return bz - az;
+            });
+            
+            this.viewport.clear();
+            var ctx = this.viewport.canvas.getContext("2d");
+            ctx.translate(-this.map.left, -this.map.top);
+            
+            //if an object wants to reset the transform, they can do so on an adhoc basis
+            // context.setTransform(1, 0, 0, 1, 0, 0);
+            for(i = 0; i < toDraw.length; i++) {
+                toDraw[i].draw(ctx, this.viewport);
+            }
+            //this.map.draw();
         },
         
         findObjectByName: function(name) {

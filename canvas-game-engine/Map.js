@@ -84,8 +84,8 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         gameManager: null,
         
         
-        spriteLayer: null,
-        spriteContext: null,
+        //spriteLayer: null,
+        //spriteContext: null,
         backgroundColor: "white",
         loaded: false,
         
@@ -208,14 +208,12 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                     case "layer":
                         var layer = new Layer({
                             map: this,
-                            node: node
+                            node: node,
+                            zIndex: this.layers.length * 5 + 1
                         });
 
                         this.layers.push(layer);
 
-                        if(this.attached) {
-                            layer.attach(this.attached);
-                        }
                         break;
                     case "objectgroup":
                         this.parseObjectgroup(gameManager, node);
@@ -227,7 +225,9 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         },
         
         makeObject: function(obj) {
-            var o = {};
+            var o = {
+                map: this
+            };
             DOM.attributes(obj, function(attr) {
                 o[attr.name] = attr.value;
             }, this);
@@ -309,7 +309,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         },
         
         detatch: function() {
-            for(var i = 0; i < this.layers.length; i++) {
+            /*for(var i = 0; i < this.layers.length; i++) {
                 this.layers[i].detatch();
             }
             delete this.attached;
@@ -319,12 +319,12 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                 delete this.spriteLayer;
                 delete this.spriteContext;
             }
-            
+            */
             this.gameManager = null;
         },
         
-        attach: function(root, manager) {
-            for(var i = 0; i < this.layers.length; i++) {
+        attach: function(manager) {
+            /*for(var i = 0; i < this.layers.length; i++) {
                 this.layers[i].attach(root);
             }
             this.attached = root;
@@ -336,7 +336,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             this.spriteLayer.style.position = "absolute";
             this.spriteContext = this.spriteLayer.getContext("2d");
             root.appendChild(this.spriteLayer);
-            
+            */
             this.gameManager = manager;
         },
         
@@ -352,11 +352,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             var tst = this.tilesetForTile(i);
             
             if(tst) {
-                if(ctx == "sprite") {
-                    ctx = this.spriteContext;
-                    dx -= this._left;
-                    dy -= this._top;
-                }
                 tst.drawTile(ctx, i, dx, dy);
             }
         },
@@ -371,7 +366,9 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             var i;
             
             for(i = 0; i < this.objects.length; i++) {
-                this.objects[i].update(delta, input, this);
+                if(this.objects[i].update) {
+                    this.objects[i].update(delta, input, this);
+                }
             }
         },
         
@@ -440,15 +437,6 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                     if(cb.call(context, obj))
                         return;
                 }
-            }
-        },
-        
-        clearSprites: function() {
-            if(this.spriteLayer) {
-                this.spriteLayer.width = this.spriteLayer.width;
-            }
-            if(this.debugLayer) {
-                this.debugLayer.clear();
             }
         },
         
