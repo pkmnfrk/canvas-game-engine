@@ -232,6 +232,8 @@ define(['jquery',
             for(i = 0; i < toDraw.length; i++) {
                 toDraw[i].draw(ctx, this.viewport);
             }
+            
+            this.viewport.flip();
             //this.map.draw();
         },
         
