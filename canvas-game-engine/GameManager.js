@@ -1,17 +1,23 @@
 define(['jquery',
+        'emitter',
         'canvas-game-engine/Map',
         'canvas-game-engine/SpriteSheet',
         'canvas-game-engine/InputManager',
-        'canvas-game-engine/Layer'],
-       function($, Map, SpriteSheet, InputManager, Layer) {
+        'canvas-game-engine/Layer',
+        'canvas-game-engine/LoadingManager'],
+       function($, emitter, Map, SpriteSheet, InputManager, Layer, LoadingManager) {
     "use strict";
     
     var GameManager = function(options) {
         options = options || {};
         
+        emitter(this);
+        
         this.viewport = options.viewport;
         
         this.window = options.window || window;
+        
+        this.loadingManager = new LoadingManager();
         
         this.objectLoader = options.objectLoader;
         
@@ -21,11 +27,27 @@ define(['jquery',
         
         this.globalObjects = [];
         this.globalObjectNames = {};
+        
+        this._audioEngineLoadingEnd = this._audioEngineLoadingEnd.bind(this);
+        this._audioEngineLoadingProgress = this._audioEngineLoadingProgress.bind(this);
+        this._audioEngineLoadingStart = this._audioEngineLoadingStart.bind(this);
+        this._mapLoadingEnd =      this._mapLoadingEnd.bind(this);
+        this._mapLoadingProgress = this._mapLoadingProgress.bind(this);
+        this._mapLoadingStart =    this._mapLoadingStart.bind(this);
+        
+        this.audioEngine = options.audioEngine;
+        if(this.audioEngine && this.audioEngine.on) {
+            //hopefully they support the necessary protocols
+            this.audioEngine.on("loadingstart", this._audioEngineLoadingStart);
+            this.audioEngine.on("loadingprogress", this._audioEngineLoadingProgress);
+            this.audioEngine.on("loadingend", this._audioEngineLoadingEnd);
+        }
     };
     
     GameManager.prototype = {
         main: null,
         map: null,
+        mapLoading: 0,
         objectLoader: null,
         window: null,
         inputManager: null,
@@ -33,18 +55,69 @@ define(['jquery',
         stopping: false,
         frozen: false,
         viewport: null,
+        audioEngine: null,
+        audioEngineLoading: 0,
         
         globalObjects: null,
         globalObjectNames: null,
         
+        loadingManager: null,
+        
+        _audioEngineLoadingStart: function(e) {
+            this.audioEngineLoading = e.number;
+        },
+        
+        _audioEngineLoadingProgress: function(e) {
+            this.audioEngineLoading = e.number;
+        },
+        
+        _audioEngineLoadingEnd: function(e) {
+            this.audioEngineLoading = 0;
+            if(this.mapLoading === 0) {
+                this._loadingComplete();
+            }
+        },
+        
+        _mapLoadingStart: function(e) {
+            
+        },
+        
+        _mapLoadingEnd: function(e) {
+            this.mapLoading = 0;
+            if(this.audioEngineLoading === 0) {
+                this._loadingComplete();
+            }
+        },
+        
+        _mapLoadingProgress: function(e) {
+            this.mapLoading = e.number;
+        },
+        
+        _loadingComplete: function() {
+            this.emit('loadingend');
+        },
+        
         setMap: function(map) {
             if(this.map) {
-                this.map.detatch();
+                this.map.off("loadingstart", this._mapLoadingStart);
+                this.map.off("loadingend", this._mapLoadingEnd);
+                this.map.off("loadingprogress", this._mapLoadingProgress);
                 this.map = null;
             }
             
             if(map) {
                 this.map = map;
+                this.map.on("loadingstart", this._mapLoadingStart);
+                this.map.on("loadingend", this._mapLoadingEnd);
+                this.map.on("loadingprogress", this._mapLoadingProgress);
+                
+                
+                if(this.mapLoading) {
+                    this.mapLoading = 0;
+                    if(this.audioEngineLoading === 0) {
+                        this._loadingComplete();
+                    }
+                }
             }
         },
         

@@ -209,7 +209,7 @@ define(['emitter',
             
             var onLoad = (function() {
                 toLoad--;
-                window.console.log("Waiting for", toLoad, "more tilesets");
+                //window.console.log("Waiting for", toLoad, "more tilesets");
                 if(toLoad === 0) {
                     this.tilesetsLoaded();
                 }
@@ -248,10 +248,6 @@ define(['emitter',
                 var dy = y * this.map.tileHeight;
                 for(var x = 0; x < this.width; x++) {
                     var dx = x * this.map.tileWidth;
-                    
-                    if(x == 169 && y == 92) {
-                        window.console.log(this.data[y][x]);
-                    }
                     
                     this.map.drawTile(this.context, this.data[y][x], dx, dy);
                     

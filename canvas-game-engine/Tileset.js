@@ -5,22 +5,15 @@ define(['canvas-game-engine/Path', 'jquery', 'emitter'], function(Path, $, emitt
         options = options || {};
         
         emitter(this);
+        this.gameManager = options.gameManager;
         
         this.map = options.map;
         
         this.properties = {};
         this.tiles = {};
         
-        if(options.data) {
-            this.data = options.data;
-
-
-            this.image = new Image();
-            this.image.src = Path.combine(this.map.rootUrl, this.data.image);
-            this.image.onload = options.onload;
-        } else if(options.node) {
-            this.parseTilesetNode(options.node);
-        }
+        this.parseTilesetNode(options.node);
+        
     };
     
     Tileset.prototype = {
@@ -37,6 +30,7 @@ define(['canvas-game-engine/Path', 'jquery', 'emitter'], function(Path, $, emitt
         imageHeight: 0,
         loaded: false,
         tilesPerRow: 0,
+        gameManager: null,
         
         parseTilesetNode: function(tileset) {
             var i;
@@ -202,14 +196,14 @@ define(['canvas-game-engine/Path', 'jquery', 'emitter'], function(Path, $, emitt
                 switch(attr.name) {
                     case "source":
                         
-                        this.image = new Image();
-                        this.image.src = Path.combine(this.map.rootUrl, attr.value);
-                        this.image.onload = (function() {
+                        this.gameManager.loadingManager.load(Path.combine(this.map.rootUrl, attr.value), "image", null, function(image, xhr) {
+                            //var img = "data:image/png;base64," + btoa(blob);
                             
+                            this.image = image;
                             this.loaded = true;
                             this.emit('loaded');
                             
-                        }).bind(this); //jshint ignore:line
+                        }, this); //jshint ignore:line
                         
                         break;
                     case "width":
@@ -225,17 +219,9 @@ define(['canvas-game-engine/Path', 'jquery', 'emitter'], function(Path, $, emitt
         },
         
         handleSourceAttribute: function(attr) {
-            $.ajax({
-                type: "GET",
-                url: Path.combine(this.map.rootUrl, attr.value),
-                dataType: "xml",
-                success: (function(xmlData) {
-                    this.parseTilesetNode(xmlData.documentElement);
-                }).bind(this),
-                error: function() {
-
-                }
-            });
+            this.gameManager.loadingManager.load(Path.combine(this.map.rootUrl, attr.value), "xml", null, function(xmlData, xhr) {
+                this.parseTilesetNode(xmlData.documentElement);
+            }, this);
         },
         
         drawTile: function(ctx, i, dx, dy) {

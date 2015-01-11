@@ -27,20 +27,16 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             this.rootUrl = this.url.substr(0, this.url.lastIndexOf('/'));
         }
         
-        
-        $.ajax({
-            type: "GET",
-            url: this.url,
-            dataType: "xml",
-            success: (function(xmlData) {
-                this.data = xmlData;
-                this.parseData(options.gameManager);
-            }).bind(this),
-            error: function() {
-                
+        this.gameManager.loadingManager.load(this.url, "xml", null, function(xml, xhr) {
+            if(!xml) {
+                window.console.error("Unable to load map data");
+                return;
             }
-        });
-        
+            
+            this.data = xml;
+            this.parseData();
+        }, this);
+                
         Object.defineProperties(this, {
             left: {
                 configurable: false,
@@ -96,12 +92,12 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
         
         frozen: false,
         
-        parseData: function(gameManager) {
+        parseData: function() {
             var i;
             var toLoad = 0;
             
             
-            this.parseMapNode(gameManager, this.data.documentElement);
+            this.parseMapNode(this.data.documentElement);
             
             this.solid = new Array(this.height);
             for(i = 0; i < this.height; i++) {
@@ -113,7 +109,8 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             
             var onTilesetLoad = (function() {
                 toLoad--;
-                window.console.log("Waiting for", toLoad, "more tilesets and layers");
+                this.emit("loadingprogress", { number: toLoad });
+                //window.console.log("Waiting for", toLoad, "more tilesets and layers");
                 if(toLoad === 0) {
                     this.tilesetsLoaded();
                 }
@@ -155,9 +152,10 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             this.updateLayers();
             this.loaded = true;
             this.emit('loaded');
+            this.emit('loadingend');
         },
         
-        parseMapNode: function(gameManager, map) {
+        parseMapNode: function(map) {
             DOM.attributes(map, function(attr) {
                 switch(attr.name) {
                     case "width":
@@ -191,7 +189,8 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
                     case "tileset":
                         var tst = new Tileset({
                             map: this,
-                            node: node
+                            node: node,
+                            gameManager: this.gameManager
                         });
 
                         this.tilesets.push(tst);
@@ -207,7 +206,7 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
 
                         break;
                     case "objectgroup":
-                        this.parseObjectgroup(gameManager, node);
+                        this.parseObjectgroup(node);
                         break;
                     default:
                         window.console.warn("Unexpected map node", node);
@@ -247,13 +246,13 @@ function($, Layer, Tileset, SolidDebugLayer, BlankLayer, emitter, DOM, GameObjec
             return o;
         },
         
-        parseObjectgroup: function(gameManager, objectgroup) {
+        parseObjectgroup: function(objectgroup) {
             DOM.children(objectgroup, function(node) {
                 if(node.nodeName == "object") {
                     var obj;
                     var o = this.makeObject(node);
-                    if(gameManager.objectLoader) {
-                        obj = gameManager.objectLoader.createObject(o);
+                    if(this.gameManager.objectLoader) {
+                        obj = this.gameManager.objectLoader.createObject(o);
                     } else {
                         obj = new GameObject(o);
                     }
