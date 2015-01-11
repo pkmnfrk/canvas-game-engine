@@ -17,7 +17,7 @@ define(['jquery',
         
         this.window = options.window || window;
         
-        this.loadingManager = new LoadingManager();
+        this.loadingManager = options.loadingManager || new LoadingManager();
         
         this.objectLoader = options.objectLoader;
         
