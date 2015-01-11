@@ -11,15 +11,19 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
             this.rootUrl = this.url.substr(0, this.url.lastIndexOf('/'));
         }
         
-        $.getJSON(this.url).done((function(data) {
-            this.data = data;
-            this.parseData();
-            
-            this.loaded = true;
-        }).bind(this)).fail(function(err) {
-            window.console.error("Failed", err);
-            window.console.log(JSON.parse(err.responseText));
-        });
+        this.gameManager = options.gameManager;
+        
+        this.gameManager.loadingManager.load(this.url, "json", null, function(data, xhr) {
+            if(data) {
+                this.data = data;
+                this.parseData();
+
+                this.loaded = true;
+            } else {
+                window.console.error("Failed", xhr);
+            }
+        }, this);
+        
     };
     
     SpriteSheet.prototype = {
@@ -32,8 +36,13 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
         loaded: false,
         
         parseData: function() {
-            this.image = new Image();
-            this.image.src = Path.combine(this.rootUrl, this.data.image);
+            this.gameManager.loadingManager.load(Path.combine(this.rootUrl, this.data.image), "image", function(image, xhr) {
+                if(!image) {
+                    window.console.error("Image failed", xhr);
+                } else {
+                    this.image = image;
+                }
+            }, this);
             
             this.frames = {};
             this.animations = {};
@@ -111,11 +120,13 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
     
     SpriteSheet.Cache = {
         sheets: {},
+        gameManager: null,
         
         get: function(url) {
             if(!SpriteSheet.Cache.sheets[url]) {
                 SpriteSheet.Cache.sheets[url] = new SpriteSheet({
-                    url: url
+                    url: url,
+                    gameManager: this.gameManager
                 });
             }
             
@@ -188,7 +199,7 @@ define(['jquery','canvas-game-engine/Path'], function($, Path) {
             
             var anim = this.spriteSheet.animations[this.curAnimation];
             
-            if(!anim) return;
+            if(!anim || !anim.frames || !anim.frames[this.curFrame]) return;
             
             this.spriteSheet.drawFrame(ctx, anim.frames[this.curFrame].frame, x, y, anim.flipX, anim.flipY);
         },

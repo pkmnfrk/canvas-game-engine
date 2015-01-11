@@ -42,6 +42,8 @@ define(['jquery',
             this.audioEngine.on("loadingprogress", this._audioEngineLoadingProgress);
             this.audioEngine.on("loadingend", this._audioEngineLoadingEnd);
         }
+        
+        SpriteSheet.Cache.gameManager = this;
     };
     
     GameManager.prototype = {
@@ -170,7 +172,7 @@ define(['jquery',
                     for(i = 0; i < this.globalObjects.length; i++) {
                         obj = this.globalObjects[i];
                         if(obj.update) {
-                            obj.update(delta / 1000, this.inputManager, this.map);
+                            obj.update(delta / 1000, this.inputManager, this.map, this);
                         }
                     }
 
@@ -183,6 +185,7 @@ define(['jquery',
             //this.map.clearSprites();
             var toDraw = [];
             
+            
             for(i = 0; i < this.globalObjects.length; i++) {
                 obj = this.globalObjects[i];
                 if(obj.draw) {
@@ -190,16 +193,19 @@ define(['jquery',
                 }
             }
             
-            for(i = 0; i < this.map.objects.length; i++) {
-                obj = this.map.objects[i];
-                if(obj.draw) {
+            //obviously, don't add any globalObjects that can't handle being without a map if there's no map!
+            if(this.map) {
+                for(i = 0; i < this.map.objects.length; i++) {
+                    obj = this.map.objects[i];
+                    if(obj.draw) {
+                        toDraw.push(obj);
+                    }
+                }
+
+                for(i = 0; i < this.map.layers.length; i++) {
+                    obj = this.map.layers[i];
                     toDraw.push(obj);
                 }
-            }
-            
-            for(i = 0; i < this.map.layers.length; i++) {
-                obj = this.map.layers[i];
-                toDraw.push(obj);
             }
             
             toDraw.sort(function(a, b) {
@@ -218,10 +224,11 @@ define(['jquery',
             
             this.viewport.clear();
             var ctx = this.viewport.canvas.getContext("2d");
-            ctx.translate(-this.map.left, -this.map.top);
-            
+            if(this.map) { //I wonder if doing this by default is a good idea...
+                ctx.translate(-this.map.left, -this.map.top);
+            }
             //if an object wants to reset the transform, they can do so on an adhoc basis
-            // context.setTransform(1, 0, 0, 1, 0, 0);
+            // ctx.setTransform(1, 0, 0, 1, 0, 0);
             for(i = 0; i < toDraw.length; i++) {
                 toDraw[i].draw(ctx, this.viewport);
             }

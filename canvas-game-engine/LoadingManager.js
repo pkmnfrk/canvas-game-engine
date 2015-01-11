@@ -22,7 +22,11 @@ define(['emitter'], function(emitter) {
         
         completeCallback: null,
         
-        maxLoading: 2,
+        maxLoading: 1,
+        
+        nowLoading: null,
+        nowLoadingSize: null,
+        nowLoadingComplete: null,
         
         beginLoading: function() {
             if(this.loadingActive) return;
@@ -48,6 +52,7 @@ define(['emitter'], function(emitter) {
         
         load: function(url, type, userData, callback, context) {
             if(typeof userData == "function" && typeof callback != "function") {
+                context = callback;
                 callback = userData;
                 userData = null;
             }
@@ -80,6 +85,15 @@ define(['emitter'], function(emitter) {
             var toLoad = this.loadingQueue.shift();
             
             var xhr = new XMLHttpRequest();
+            
+            xhr.onprogress = (function(e) {
+                //window.console.log(toLoad.url, e);
+                this.nowLoadingUrl = toLoad.url;
+                this.nowLoadingTotal = e.total;
+                this.nowLoadingComplete = e.loaded;
+                
+            }).bind(this);
+            xhr.onloadstart = xhr.onprogress;
             
             xhr.onreadystatechange = (function() {
                 
@@ -140,9 +154,10 @@ define(['emitter'], function(emitter) {
                     percent: this.loadingComplete / this.loadingTotal
                 });
                 
-                if(this.loadingComplete == this.loadingTotal && this.completeCallback) {
+                if(this.loadingActive && this.loadingComplete == this.loadingTotal && this.completeCallback) {
                     this.loadingActive = false;
                     this.completeCallback();
+                    this.completeCallback = null;
                 } else {
                     this.loadNext();
                 }
