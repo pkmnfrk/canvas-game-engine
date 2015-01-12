@@ -21,9 +21,9 @@ define([], function() {
             this.nowLoadingTotal = lm.nowLoadingTotal || 1;
             this.nowLoadingComplete = lm.nowLoadingComplete;
         },
-        draw: function(ctx, viewport) {
-            var w = viewport.width;
-            var h = viewport.height;
+        finalDraw: function(ctx, viewport) {
+            var w = viewport.finalWidth;
+            var h = viewport.finalHeight;
             
             var centerX = w / 2;
             var margin = w * 0.2;

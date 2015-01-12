@@ -188,18 +188,18 @@ define(['jquery',
             
             for(i = 0; i < this.globalObjects.length; i++) {
                 obj = this.globalObjects[i];
-                if(obj.draw) {
+                //if(obj.draw) {
                     toDraw.push(obj);
-                }
+                //}
             }
             
             //obviously, don't add any globalObjects that can't handle being without a map if there's no map!
             if(this.map) {
                 for(i = 0; i < this.map.objects.length; i++) {
                     obj = this.map.objects[i];
-                    if(obj.draw) {
+                    //if(obj.draw) {
                         toDraw.push(obj);
-                    }
+                    //}
                 }
 
                 for(i = 0; i < this.map.layers.length; i++) {
@@ -222,6 +222,8 @@ define(['jquery',
                 return az - bz;
             });
             
+            var needsFinalDraw = [];
+            
             this.viewport.clear();
             var ctx = this.viewport.canvas.getContext("2d");
             if(this.map) { //I wonder if doing this by default is a good idea...
@@ -230,10 +232,23 @@ define(['jquery',
             //if an object wants to reset the transform, they can do so on an adhoc basis
             // ctx.setTransform(1, 0, 0, 1, 0, 0);
             for(i = 0; i < toDraw.length; i++) {
-                toDraw[i].draw(ctx, this.viewport);
+                if(toDraw[i].draw) {
+                    toDraw[i].draw(ctx, this.viewport);
+                }
+                if(toDraw[i].finalDraw) {
+                    needsFinalDraw.push(toDraw[i]);
+                }
             }
             
-            this.viewport.flip();
+            this.viewport.flip(); //I guess this is technically like double buffering
+            
+            if(needsFinalDraw.length) {
+                ctx = this.viewport.finalCanvas.getContext("2d");
+                
+                for(i = 0; i < needsFinalDraw.length; i++) {
+                    needsFinalDraw[i].finalDraw(ctx, this.viewport);
+                }
+            }
             //this.map.draw();
         },
         
